@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Tracker</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #4cb5c3;
+            --danger-color: #e15554;
+            --success-color: #3bb273;
+            --dark-color: #2d3047;
+            --light-color: #f8f9fa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a3a, #0d1b2a);
+            color: var(--light-color);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(13, 27, 42, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--accent-color), var(--success-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0aec0;
+        }
+        
+        .player-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        input, button {
+            padding: 12px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        input {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-width: 200px;
+        }
+        
+        input::placeholder {
+            color: #a0aec0;
+        }
+        
+        button {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #e6af2e;
+            color: white;
+        }
+        
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .player-card {
+            background: rgba(13, 27, 42, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .player-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .player-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .player-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+        
+        .energy-display {
+            font-size: 2rem;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        
+        .energy-bar-container {
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        .energy-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--danger-color), #e6af2e, var(--success-color));
+            border-radius: 15px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+        
+        .energy-bar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.2) 50%, 
+                transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .energy-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .energy-input {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .energy-input input {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #a0aec0;
+        }
+        
+        .empty-state h2 {
+            margin-bottom: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .players-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .player-form {
+                flex-direction: column;
+            }
+            
+            input {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ Energy Tracker</h1>
+            <p class="subtitle">Track energy levels for multiple players with a maximum of 100 energy points</p>
+        </header>
+        
+        <div class="player-form">
+            <input type="text" id="player-name" placeholder="Enter player name">
+            <button id="add-player" class="btn-primary">Add Player</button>
+        </div>
+        
+        <div id="players-container" class="players-grid">
+            <!-- Player cards will be added here dynamically -->
+            <div class="empty-state" id="empty-state">
+                <h2>No players yet</h2>
+                <p>Add a player to start tracking energy levels!</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Energy Tracker &copy; 2023 | Refresh the page to reset all data</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get DOM elements
+            const playerNameInput = document.getElementById('player-name');
+            const addPlayerButton = document.getElementById('add-player');
+            const playersContainer = document.getElementById('players-container');
+            const emptyState = document.getElementById('empty-state');
+            
+            // Players data - in a real app, this would be stored in a database
+            let players = JSON.parse(localStorage.getItem('energyTrackerPlayers')) || [];
+            
+            // Initialize the app
+            renderPlayers();
+            
+            // Event listeners
+            addPlayerButton.addEventListener('click', addPlayer);
+            playerNameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addPlayer();
+                }
+            });
+            
+            // Functions
+            function addPlayer() {
+                const name = playerNameInput.value.trim();
+                
+                if (name === '') {
+                    alert('Please enter a player name');
+                    return;
+                }
+                
+                // Check if player already exists
+                if (players.some(player => player.name === name)) {
+                    alert('Player with this name already exists');
+                    return;
+                }
+                
+                // Add new player
+                players.push({
+                    id: Date.now().toString(),
+                    name: name,
+                    energy: 100
+                });
+                
+                // Save to localStorage
+                savePlayers();
+                
+                // Clear input and re-render
+                playerNameInput.value = '';
+                renderPlayers();
+            }
+            
+            function removePlayer(playerId) {
+                players = players.filter(player => player.id !== playerId);
+                savePlayers();
+                renderPlayers();
+            }
+            
+            function updateEnergy(playerId, amount) {
+                const player = players.find(p => p.id === playerId);
+                if (player) {
+                    player.energy = Math.max(0, Math.min(100, player.energy + amount));
+                    savePlayers();
+                    renderPlayers();
+                }
+            }
+            
+            function setEnergy(playerId, energy) {
+                const player = players.find(p => p.id === playerId);
+                if (player) {
+                    player.energy = Math.max(0, Math.min(100, parseInt(energy) || 0));
+                    savePlayers();
+                    renderPlayers();
+                }
+            }
+            
+            function resetEnergy(playerId) {
+                const player = players.find(p => p.id === playerId);
+                if (player) {
+                    player.energy = 100;
+                    savePlayers();
+                    renderPlayers();
+                }
+            }
+            
+            function savePlayers() {
+                localStorage.setItem('energyTrackerPlayers', JSON.stringify(players));
+            }
+            
+            function renderPlayers() {
+                // Hide empty state if there are players
+                if (players.length > 0) {
+                    emptyState.style.display = 'none';
+                } else {
+                    emptyState.style.display = 'block';
+                }
+                
+                // Clear container
+                playersContainer.innerHTML = '';
+                
+                // Add player cards
+                players.forEach(player => {
+                    const playerCard = document.createElement('div');
+                    playerCard.className = 'player-card';
+                    playerCard.innerHTML = `
+                        <div class="player-header">
+                            <div class="player-name">${player.name}</div>
+                            <div class="player-actions">
+                                <button class="btn-small btn-warning" onclick="resetEnergy('${player.id}')">Reset</button>
+                                <button class="btn-small btn-danger" onclick="removePlayer('${player.id}')">Remove</button>
+                            </div>
+                        </div>
+                        
+                        <div class="energy-display">${player.energy}/100</div>
+                        
+                        <div class="energy-bar-container">
+                            <div class="energy-bar" style="width: ${player.energy}%">
+                                <div class="energy-bar-overlay"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="energy-controls">
+                            <div class="energy-input">
+                                <input type="number" id="energy-amount-${player.id}" placeholder="Amount" min="1" max="100">
+                                <button class="btn-success" onclick="addEnergy('${player.id}')">Add</button>
+                            </div>
+                            <div class="energy-input">
+                                <input type="number" id="subtract-amount-${player.id}" placeholder="Amount" min="1" max="100">
+                                <button class="btn-danger" onclick="subtractEnergy('${player.id}')">Subtract</button>
+                            </div>
+                        </div>
+                        
+                        <div class="energy-controls" style="margin-top: 10px;">
+                            <button class="btn-primary" onclick="updateEnergy('${player.id}', 10)">+10</button>
+                            <button class="btn-primary" onclick="updateEnergy('${player.id}', 5)">+5</button>
+                            <button class="btn-danger" onclick="updateEnergy('${player.id}', -5)">-5</button>
+                            <button class="btn-danger" onclick="updateEnergy('${player.id}', -10)">-10</button>
+                        </div>
+                    `;
+                    
+                    playersContainer.appendChild(playerCard);
+                });
+            }
+            
+            // Make functions available globally for onclick handlers
+            window.addEnergy = function(playerId) {
+                const amountInput = document.getElementById(`energy-amount-${playerId}`);
+                const amount = parseInt(amountInput.value) || 0;
+                if (amount > 0) {
+                    updateEnergy(playerId, amount);
+                    amountInput.value = '';
+                }
+            };
+            
+            window.subtractEnergy = function(playerId) {
+                const amountInput = document.getElementById(`subtract-amount-${playerId}`);
+                const amount = parseInt(amountInput.value) || 0;
+                if (amount > 0) {
+                    updateEnergy(playerId, -amount);
+                    amountInput.value = '';
+                }
+            };
+            
+            window.updateEnergy = updateEnergy;
+            window.removePlayer = removePlayer;
+            window.resetEnergy = resetEnergy;
+            window.setEnergy = setEnergy;
+        });
+    </script>
+</body>
+</html>
